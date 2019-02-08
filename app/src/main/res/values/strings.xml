@@ -1,3 +1,28 @@
 <resources>
     <string name="app_name">Csillagpont</string>
+
+    <string name="title_activity_main_menu">MainMenu</string>
+    <string name="main_menu_title">Főmenü</string>
+    <string name="main_menu_options_settings">Beállítások</string>
+    <string name="main_menu_options_logout">Kijelentkezés</string>
+
+    <string name="main_menu_options_map">Térkép</string>
+    <string name="main_menu_options_programs">Programok</string>
+    <string name="main_menu_options_news">Hírek</string>
+    <string name="main_menu_options_favourites">Kedvencek</string>
+
+    <string name="main_menu_options_default_button">Random felugró szöveg</string>
+
+
+    <string name="map_title">Térkép oldal</string>
+
+
+    <string name="programs_title">Programok oldal</string>
+
+
+    <string name="news_title">Hírek oldal</string>
+
+
+    <string name="favourites_title">Kedvencek oldal</string>
+
 </resources>
