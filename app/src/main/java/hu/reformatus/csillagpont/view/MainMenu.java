@@ -1,4 +1,4 @@
-package hu.reformatus.csillagpont;
+package hu.reformatus.csillagpont.view;
 
 import android.content.Context;
 import android.content.Intent;
@@ -13,6 +13,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
+
+import hu.reformatus.csillagpont.R;
 
 public class MainMenu extends AppCompatActivity {
 
@@ -31,7 +33,7 @@ public class MainMenu extends AppCompatActivity {
 
         mapButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                Intent intent = new Intent(getApplicationContext(), MapActivity.class);
+                Intent intent = new Intent(getApplicationContext(), MapsActivity.class);
                 startActivity(intent);
             }
         });

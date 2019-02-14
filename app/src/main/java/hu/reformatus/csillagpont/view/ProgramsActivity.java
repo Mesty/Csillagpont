@@ -1,13 +1,15 @@
-package hu.reformatus.csillagpont;
+package hu.reformatus.csillagpont.view;
 
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
-public class FavouritesActivity extends AppCompatActivity {
+import hu.reformatus.csillagpont.R;
+
+public class ProgramsActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_favourites);
+        setContentView(R.layout.activity_programs);
     }
 }
