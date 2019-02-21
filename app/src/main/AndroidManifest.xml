@@ -34,7 +34,8 @@
             android:label="@string/title_activity_maps"></activity>
         <activity android:name=".view.FavouritesActivity" />
         <activity android:name=".view.NewsActivity" />
-        <activity android:name=".view.ProgramsActivity" />
+        <activity android:name=".view.ProgramsActivity"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar"/>
         <activity
             android:name=".view.MainMenu"
             android:label="@string/title_activity_main_menu"
