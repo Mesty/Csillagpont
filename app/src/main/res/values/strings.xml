@@ -53,5 +53,6 @@
     <string name="time_24pm">24:00</string>
     <string name="birth_day">I am going to birthday party</string>
     <string name="current_day_date">8 October, 2016</string>
+    <string name="search">Keresés</string>
 
 </resources>

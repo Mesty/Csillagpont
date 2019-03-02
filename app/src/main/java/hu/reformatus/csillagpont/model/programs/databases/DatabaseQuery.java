@@ -12,6 +12,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import hu.reformatus.csillagpont.model.programs.databases.EventObjects.Category;
 
 public class DatabaseQuery extends DatabaseObject {
 
@@ -36,9 +37,15 @@ public class DatabaseQuery extends DatabaseObject {
         if(cursor.moveToFirst()){
             do{
                 int id = cursor.getInt(0);
-                String message = cursor.getString(cursor.getColumnIndexOrThrow("message"));
-                String startDate = cursor.getString(cursor.getColumnIndexOrThrow("reminder"));
-                String endDate = cursor.getString(cursor.getColumnIndexOrThrow("end"));
+                String title = cursor.getString(cursor.getColumnIndexOrThrow("title"));
+                String description = cursor.getString(cursor.getColumnIndexOrThrow("description"));
+                String cat = cursor.getString(cursor.getColumnIndexOrThrow("category"));
+                if(cat == null || cat.equals(""))
+                    cat = "0";
+                Category category = Category.fromInteger(Integer.parseInt(cat));
+                String location = cursor.getString(cursor.getColumnIndexOrThrow("location"));
+                String startDate = cursor.getString(cursor.getColumnIndexOrThrow("start_time"));
+                String endDate = cursor.getString(cursor.getColumnIndexOrThrow("end_time"));
                 //convert start date to date object
 
                 //if(startDate != null && !startDate.isEmpty() &&
@@ -54,7 +61,8 @@ public class DatabaseQuery extends DatabaseObject {
                         int dYear = dDate.get(Calendar.YEAR);
 
                         if (calDay == dDay && calMonth == dMonth && calYear == dYear) {
-                            events.add(new EventObjects(id, message, reminderDate, end));
+                            events.add(new EventObjects(id, title, description, category, location,
+                                    reminderDate, end));
                         }
                     //}
                 //}
@@ -65,7 +73,7 @@ public class DatabaseQuery extends DatabaseObject {
     }
 
     private Date convertStringToDate(String dateInString){
-        DateFormat format = new SimpleDateFormat("d-MM-yyyy HH:mm", Locale.ENGLISH);
+        DateFormat format = new SimpleDateFormat("yyyy.MM.dd. HH:mm", Locale.ENGLISH);
         Date date = null;
         try {
             date = format.parse(dateInString);
