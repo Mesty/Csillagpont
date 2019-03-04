@@ -1,6 +1,7 @@
 package hu.reformatus.csillagpont.view;
 
-import android.content.Context;
+import android.annotation.SuppressLint;
+import android.content.Intent;
 import android.graphics.Color;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -9,8 +10,8 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
+import android.widget.ScrollView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -19,8 +20,12 @@ import java.util.List;
 import java.util.Locale;
 
 import hu.reformatus.csillagpont.R;
+import hu.reformatus.csillagpont.model.programs.RemoteDatabase;
 import hu.reformatus.csillagpont.model.programs.databases.DatabaseQuery;
 import hu.reformatus.csillagpont.model.programs.databases.EventObjects;
+import hu.reformatus.csillagpont.viewmodel.OnSwipeTouchListener;
+
+import static hu.reformatus.csillagpont.model.programs.databases.EventObjects.getCollideLevel;
 
 
 public class ProgramsActivity extends AppCompatActivity {
@@ -35,6 +40,7 @@ public class ProgramsActivity extends AppCompatActivity {
     List<EventObjects> dailyEvent;
     private static final int StartingHour = 6;
 
+    @SuppressLint("ClickableViewAccessibility")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -46,6 +52,8 @@ public class ProgramsActivity extends AppCompatActivity {
         cal.set(Calendar.MONTH, Calendar.JULY);
         cal.set(Calendar.DAY_OF_MONTH, 23);
         currentDate.setText(displayDateInString(cal.getTime()));
+        RemoteDatabase rmDb = new RemoteDatabase(this);
+        rmDb.checkAndDownloadUpdates();
         displayDailyEvents();
         previousDay = findViewById(R.id.previous_day);
         nextDay = findViewById(R.id.next_day);
@@ -60,6 +68,21 @@ public class ProgramsActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 nextCalendarDate();
+                setVisibilities();
+            }
+        });
+        ScrollView rows = findViewById(R.id.scrollView);
+        rows.setOnTouchListener(new OnSwipeTouchListener(ProgramsActivity.this) {
+            @Override
+            public void onSwipeRight() {
+                if(cal.get(Calendar.DATE) > 23)
+                    previousCalendarDate();
+                setVisibilities();
+            }
+            @Override
+            public void onSwipeLeft() {
+                if(cal.get(Calendar.DATE) < 27)
+                    nextCalendarDate();
                 setVisibilities();
             }
         });
@@ -101,7 +124,7 @@ public class ProgramsActivity extends AppCompatActivity {
         displayDailyEvents();
     }
     private String displayDateInString(Date mDate){
-        SimpleDateFormat formatter = new SimpleDateFormat("MMMM d. EEEE");
+        @SuppressLint("SimpleDateFormat") SimpleDateFormat formatter = new SimpleDateFormat("MMMM d. EEEE");
         return formatter.format(mDate);
     }
     private void displayDailyEvents(){
@@ -115,9 +138,11 @@ public class ProgramsActivity extends AppCompatActivity {
             Log.d(TAG, "Height " + eventBlockHeight);
             int eventCollideLevel = getCollideLevel(dailyEvent, eObject);
             int eventCollideLevelTotal = getCollideLevel(dailyEvent, eObject,true);
-            displayEventSection(eventDate, eventBlockHeight, eventCollideLevel, eventCollideLevelTotal, eventMessage);
+            int id = eObject.getId();
+            displayEventSection(id, eventDate, eventBlockHeight, eventCollideLevel, eventCollideLevelTotal, eventMessage);
         }
     }
+
     private int getEventTimeFrame(Date start, Date end){
         long timeDifference = end.getTime() - start.getTime();
         Calendar mCal = Calendar.getInstance();
@@ -126,7 +151,8 @@ public class ProgramsActivity extends AppCompatActivity {
         int minutes = mCal.get(Calendar.MINUTE);
         return (hours * 60) + ((minutes * 60) / 100);
     }
-    private void displayEventSection(Date eventDate, int height, int CollideLevel, int CollideLevelTotal,  String message){
+
+    private void displayEventSection(final int id, Date eventDate, int height, int CollideLevel, int CollideLevelTotal,  String message){
         SimpleDateFormat timeFormatter = new SimpleDateFormat("HH:mm", Locale.ENGLISH);
         String displayValue = timeFormatter.format(eventDate);
         String[]hourMinutes = displayValue.split(":");
@@ -137,9 +163,10 @@ public class ProgramsActivity extends AppCompatActivity {
         int topViewMargin = (hours * 60) + ((minutes * 60) / 100);
         Log.d(TAG, "Margin top " + topViewMargin);
         //TODO: C type collision
-        createEventView(topViewMargin,24 + 500/CollideLevelTotal * CollideLevel, CollideLevelTotal,  height, message);
+        createEventView(id, topViewMargin,24 + 500/CollideLevelTotal * CollideLevel, CollideLevelTotal,  height, message);
     }
-    private void createEventView(int topMargin, int leftMargin, int width, int height, final String message){
+
+    private void createEventView(final int id, int topMargin, int leftMargin, int width, int height, final String message){
         final TextView mEventView = new TextView(ProgramsActivity.this);
         RelativeLayout.LayoutParams lParam = new RelativeLayout.LayoutParams(500/width, LinearLayout.LayoutParams.WRAP_CONTENT);
         lParam.addRule(RelativeLayout.ALIGN_PARENT_TOP);
@@ -157,31 +184,10 @@ public class ProgramsActivity extends AppCompatActivity {
         mEventView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
-                Toast.makeText(ProgramsActivity.this, "Clicked " + message, Toast.LENGTH_LONG).show();
+                Intent intent = new Intent(getApplicationContext(), ProgramDetailsActivity.class);
+                intent.putExtra("EVENT_ID", id);
+                startActivity(intent);
             }
         });
     }
-
-    private int getCollideLevel(List<EventObjects> dailyEvent, EventObjects eObject, boolean total){
-        int collideLevel = 0;
-        for(EventObjects e : dailyEvent){
-            if(!total && e.getId() == eObject.getId())
-                break;
-            if(
-                    (e.getStartDate().compareTo(eObject.getStartDate()) >= 0 &&
-                            e.getStartDate().compareTo(eObject.getEndDate()) <= 0) ||
-                            (e.getStartDate().compareTo(eObject.getStartDate()) <= 0 &&
-                                    e.getEndDate().compareTo(eObject.getStartDate()) >= 0)
-            )
-                collideLevel++;
-        }
-        return collideLevel;
-    }
-    private int getCollideLevel(List<EventObjects> dailyEvent, EventObjects eObject){
-        return getCollideLevel(dailyEvent, eObject, false);
-    }
-
-
-
 }
