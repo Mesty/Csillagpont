@@ -2,6 +2,8 @@ package hu.reformatus.csillagpont.model.programs;
 
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.util.Log;
 
@@ -33,6 +35,13 @@ public class RemoteDatabase {
     
     public void checkAndDownloadUpdates(){
         new JsonTask().execute("http://lokodonc.hu/CSPdatabases/getEvents.php");
+    }
+
+    public boolean isNetworkAvailable() {
+        ConnectivityManager connectivityManager
+                = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+        return activeNetworkInfo != null && activeNetworkInfo.isConnected();
     }
     
     private class JsonTask extends AsyncTask<String, String, String> {

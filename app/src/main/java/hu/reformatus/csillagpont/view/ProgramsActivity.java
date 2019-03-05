@@ -12,6 +12,7 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -53,7 +54,10 @@ public class ProgramsActivity extends AppCompatActivity {
         cal.set(Calendar.DAY_OF_MONTH, 23);
         currentDate.setText(displayDateInString(cal.getTime()));
         RemoteDatabase rmDb = new RemoteDatabase(this);
-        rmDb.checkAndDownloadUpdates();
+        if(rmDb.isNetworkAvailable())
+            rmDb.checkAndDownloadUpdates();
+        else
+            Toast.makeText(this,getString(R.string.offline_mode), Toast.LENGTH_SHORT).show();
         displayDailyEvents();
         previousDay = findViewById(R.id.previous_day);
         nextDay = findViewById(R.id.next_day);

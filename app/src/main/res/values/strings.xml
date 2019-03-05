@@ -58,5 +58,6 @@
     <string name="removed_from_favorites">Kedvencekből eltávolítva</string>
     <string name="add_to_favorites">Kedvencekhez adva</string>
     <string name="please_wait">Please wait</string>
+    <string name="offline_mode">Offline mód</string>
 
 </resources>
