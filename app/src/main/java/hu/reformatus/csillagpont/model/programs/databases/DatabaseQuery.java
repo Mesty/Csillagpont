@@ -85,7 +85,7 @@ public class DatabaseQuery extends DatabaseObject {
             String title = cursor.getString(cursor.getColumnIndexOrThrow("title"));
             String description = cursor.getString(cursor.getColumnIndexOrThrow("description"));
             String cat = cursor.getString(cursor.getColumnIndexOrThrow("category"));
-            if(cat == null || cat.equals(""))
+            if(cat == null || cat.equals("") || cat.equals("null"))
                 cat = "0";
             Category category = Category.getCategory(cat);
             String location = cursor.getString(cursor.getColumnIndexOrThrow("location"));
@@ -109,10 +109,10 @@ public class DatabaseQuery extends DatabaseObject {
     }
 
     public void updateDatabase(JSONArray jArr){
-        String query = "DELETE FROM events";
-        this.getDbConnection().execSQL(query);
-        query = "vacuum";
-        this.getDbConnection().execSQL(query);
+        this.getDbConnection().execSQL("DELETE FROM events;");
+        this.getDbConnection().execSQL("VACUUM");
+        this.getDbConnection().execSQL("DELETE FROM SQLITE_SEQUENCE WHERE NAME = 'events'");
+
 
         try{
             for(int i = 0; i< jArr.length(); i++){
