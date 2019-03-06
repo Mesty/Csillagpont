@@ -6,6 +6,7 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.text.Html;
 import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
@@ -56,18 +57,22 @@ public class ProgramDetailsActivity extends AppCompatActivity {
         if(eventId >= 0){
             EventObjects event = mQuery.getEventById(eventId);
             TextView title = findViewById(R.id.tvPdTitle);
-            title.setText(event.getTitle());
+            title.setText("Cím: "+event.getTitle());
             TextView description = findViewById(R.id.tvPdDescriptions);
-            description.setText(event.getDescription());
+            description.setText(Html.fromHtml("Leírás: "+ event.getDescription()));
             TextView category = findViewById(R.id.tvPdCategory);
-            category.setText(event.getCategory().toString());
+            category.setText("Kategória: "+event.getCategory().toString());
             TextView location = findViewById(R.id.tvPdLocation);
-            location.setText(event.getLocation());
+            location.setText("Helyszín: "+event.getLocation());
             SimpleDateFormat timeFormatter = new SimpleDateFormat("yyyy.MM.dd. HH:mm");
             TextView startTime = findViewById(R.id.tvPdStartTime);
-            startTime.setText(timeFormatter.format(event.getStartDate()));
+            startTime.setText("Kezdet: "+timeFormatter.format(event.getStartDate()));
             TextView endTime = findViewById(R.id.tvPdEndTime);
-            endTime.setText(timeFormatter.format(event.getEndDate()));
+            endTime.setText("Vég: "+timeFormatter.format(event.getEndDate()));
+            TextView wheelAccessible = findViewById(R.id.tvPdWheelAccessible);
+            wheelAccessible.setText("Kerekesszékkel látogatható: " +event.getWheelAccessible());
+            TextView forRegistered = findViewById(R.id.tvPdForRegistered);
+            forRegistered.setText("Regisztrációhoz kötött: "+event.getForRegistered());
         }
         else{
             Log.e(TAG, "Unknown Id in database!");

@@ -28,13 +28,23 @@ import static android.content.ContentValues.TAG;
 public class RemoteDatabase {
     private ProgressDialog pd;
     private Context context;
+    private static long tStart = 0;
 
-    public RemoteDatabase(Context context){
+    public RemoteDatabase(Context context) {
         this.context = context;
     }
-    
-    public void checkAndDownloadUpdates(){
-        new JsonTask().execute("http://lokodonc.hu/CSPdatabases/getEvents.php");
+
+    public void checkAndDownloadUpdates() {
+        long tEnd = System.currentTimeMillis();
+        long tDelta = tEnd - tStart;
+        double elapsedSeconds = tDelta / 1000.0;
+        double elapsedMinute = elapsedSeconds / 60;
+        if (elapsedMinute >= 5.0f) {
+            tStart = System.currentTimeMillis();
+            Log.d(TAG, "elapsed 5 Minutes");
+            if (isUpdateAvailable())
+                new JsonTask().execute("http://lokodonc.hu/CSPdatabases/getEvents.php");
+        }
     }
 
     public boolean isNetworkAvailable() {
@@ -43,7 +53,11 @@ public class RemoteDatabase {
         NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
         return activeNetworkInfo != null && activeNetworkInfo.isConnected();
     }
-    
+
+    private boolean isUpdateAvailable() {
+        return true;
+    }
+
     private class JsonTask extends AsyncTask<String, String, String> {
 
         protected void onPreExecute() {
@@ -73,7 +87,7 @@ public class RemoteDatabase {
                 String line = "";
 
                 while ((line = reader.readLine()) != null) {
-                    buffer.append(line+"\n");
+                    buffer.append(line + "\n");
                     //Log.d("Response: ", "> " + line);
 
                 }
@@ -102,20 +116,19 @@ public class RemoteDatabase {
         @Override
         protected void onPostExecute(String result) {
             super.onPostExecute(result);
-            if (pd.isShowing()){
+            if (pd.isShowing()) {
                 pd.dismiss();
             }
             try {
                 JSONArray json = new JSONArray(result);
                 DatabaseQuery dQuery = new DatabaseQuery(context);
                 dQuery.updateDatabase(json);
-                Log.d(TAG, "length: "+String.valueOf(json.length()));
+                Log.d(TAG, "length: " + String.valueOf(json.length()));
 
                 //Log.d(TAG, "row: "+row);
-            }catch (JSONException e){
+            } catch (JSONException e) {
                 e.printStackTrace();
             }
-            //TODO: output: result
         }
     }
 }

@@ -79,6 +79,10 @@ public class EventObjects {
         this.end = end;
     }
 
+    public int getId() {
+        return id;
+    }
+
     public String getTitle() {
         return title;
     }
@@ -103,8 +107,12 @@ public class EventObjects {
         return end;
     }
 
-    public int getId() {
-        return id;
+    public boolean getWheelAccessible(){
+        return isWheelAccessible;
+    }
+
+    public boolean getForRegistered(){
+        return isOnlyRegistered;
     }
 
     public static int getCollideLevel(final List<EventObjects> dailyEvent, final EventObjects eObject, final boolean total){
@@ -113,10 +121,8 @@ public class EventObjects {
             if(!total && e.getId() == eObject.getId())
                 break;
             if(
-                    (e.getStartDate().compareTo(eObject.getStartDate()) >= 0 &&
-                            e.getStartDate().compareTo(eObject.getEndDate()) <= 0) ||
-                            (e.getStartDate().compareTo(eObject.getStartDate()) <= 0 &&
-                                    e.getEndDate().compareTo(eObject.getStartDate()) >= 0)
+                    !(e.getEndDate().compareTo(eObject.getStartDate()) <= 0  ||
+                            eObject.getEndDate().compareTo(e.getStartDate()) <= 0 )
             )
                 collideLevel++;
         }

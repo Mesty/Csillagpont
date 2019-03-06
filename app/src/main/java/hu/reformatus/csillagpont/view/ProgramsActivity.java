@@ -2,7 +2,12 @@ package hu.reformatus.csillagpont.view;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.content.res.Resources;
+import android.content.res.TypedArray;
 import android.graphics.Color;
+import android.graphics.ColorSpace;
+import android.graphics.PorterDuff;
+import android.graphics.drawable.Drawable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -40,6 +45,9 @@ public class ProgramsActivity extends AppCompatActivity {
     private int eventIndex;
     List<EventObjects> dailyEvent;
     private static final int StartingHour = 6;
+    private static final int screenWidth = 600;
+    private OnSwipeTouchListener onSwipeTouchListener;
+    private static final int leftMargin = 24;
 
     @SuppressLint("ClickableViewAccessibility")
     @Override
@@ -54,10 +62,10 @@ public class ProgramsActivity extends AppCompatActivity {
         cal.set(Calendar.DAY_OF_MONTH, 23);
         currentDate.setText(displayDateInString(cal.getTime()));
         RemoteDatabase rmDb = new RemoteDatabase(this);
-        if(rmDb.isNetworkAvailable())
+        if (rmDb.isNetworkAvailable())
             rmDb.checkAndDownloadUpdates();
         else
-            Toast.makeText(this,getString(R.string.offline_mode), Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, getString(R.string.offline_mode), Toast.LENGTH_SHORT).show();
         displayDailyEvents();
         previousDay = findViewById(R.id.previous_day);
         nextDay = findViewById(R.id.next_day);
@@ -76,37 +84,39 @@ public class ProgramsActivity extends AppCompatActivity {
             }
         });
         ScrollView rows = findViewById(R.id.scrollView);
-        rows.setOnTouchListener(new OnSwipeTouchListener(ProgramsActivity.this) {
+        onSwipeTouchListener = new OnSwipeTouchListener(ProgramsActivity.this) {
             @Override
             public void onSwipeRight() {
-                if(cal.get(Calendar.DATE) > 23)
+                if (cal.get(Calendar.DATE) > 23)
                     previousCalendarDate();
                 setVisibilities();
             }
+
             @Override
             public void onSwipeLeft() {
-                if(cal.get(Calendar.DATE) < 27)
+                if (cal.get(Calendar.DATE) < 27)
                     nextCalendarDate();
                 setVisibilities();
             }
-        });
+        };
+        rows.setOnTouchListener(onSwipeTouchListener);
     }
 
-    private void setVisibilities(){
-        if(cal.get(Calendar.DATE) == 23)
+    private void setVisibilities() {
+        if (cal.get(Calendar.DATE) == 23)
             previousDay.setVisibility(View.INVISIBLE);
         else
             previousDay.setVisibility(View.VISIBLE);
-        if(cal.get(Calendar.DATE) == 27)
+        if (cal.get(Calendar.DATE) == 27)
             nextDay.setVisibility(View.INVISIBLE);
         else
             nextDay.setVisibility(View.VISIBLE);
     }
 
-    private void previousCalendarDate(){
-        for(int i = 0; i < mLayout.getChildCount(); i++){
+    private void previousCalendarDate() {
+        for (int i = 0; i < mLayout.getChildCount(); i++) {
             Object a = mLayout.getChildAt(i).getTag();
-            if(a != null && a.equals("event")) {
+            if (a != null && a.equals("event")) {
                 mLayout.removeViewAt(i);
                 i--;
             }
@@ -115,10 +125,11 @@ public class ProgramsActivity extends AppCompatActivity {
         currentDate.setText(displayDateInString(cal.getTime()));
         displayDailyEvents();
     }
-    private void nextCalendarDate(){
-        for(int i = 0; i < mLayout.getChildCount(); i++) {
+
+    private void nextCalendarDate() {
+        for (int i = 0; i < mLayout.getChildCount(); i++) {
             Object a = mLayout.getChildAt(i).getTag();
-            if(a != null && a.equals("event")) {
+            if (a != null && a.equals("event")) {
                 mLayout.removeViewAt(i);
                 i--;
             }
@@ -127,52 +138,59 @@ public class ProgramsActivity extends AppCompatActivity {
         currentDate.setText(displayDateInString(cal.getTime()));
         displayDailyEvents();
     }
-    private String displayDateInString(Date mDate){
-        @SuppressLint("SimpleDateFormat") SimpleDateFormat formatter = new SimpleDateFormat("MMMM d. EEEE");
+
+    private String displayDateInString(Date mDate) {
+        @SuppressLint("SimpleDateFormat")
+        SimpleDateFormat formatter = new SimpleDateFormat("MMMM d. EEEE");
         return formatter.format(mDate);
     }
-    private void displayDailyEvents(){
+
+    private void displayDailyEvents() {
         Date calendarDate = cal.getTime();
         dailyEvent = mQuery.getAllFutureEvents(calendarDate);
-        for(EventObjects eObject : dailyEvent){
+        for (EventObjects eObject : dailyEvent) {
             Date eventDate = eObject.getStartDate();
             Date endDate = eObject.getEndDate();
             String eventMessage = eObject.getTitle();
             int eventBlockHeight = getEventTimeFrame(eventDate, endDate);
             Log.d(TAG, "Height " + eventBlockHeight);
             int eventCollideLevel = getCollideLevel(dailyEvent, eObject);
-            int eventCollideLevelTotal = getCollideLevel(dailyEvent, eObject,true);
+            int eventCollideLevelTotal = getCollideLevel(dailyEvent, eObject, true);
             int id = eObject.getId();
-            displayEventSection(id, eventDate, eventBlockHeight, eventCollideLevel, eventCollideLevelTotal, eventMessage);
+            displayEventSection(id, eventDate, eventBlockHeight, eventCollideLevel,
+                    eventCollideLevelTotal, eventMessage);
         }
     }
 
-    private int getEventTimeFrame(Date start, Date end){
+    private int getEventTimeFrame(Date start, Date end) {
         long timeDifference = end.getTime() - start.getTime();
         Calendar mCal = Calendar.getInstance();
         mCal.setTimeInMillis(timeDifference);
-        int hours = mCal.get(Calendar.HOUR)-1;
+        int hours = mCal.get(Calendar.HOUR) - 1;
         int minutes = mCal.get(Calendar.MINUTE);
         return (hours * 60) + ((minutes * 60) / 100);
     }
 
-    private void displayEventSection(final int id, Date eventDate, int height, int CollideLevel, int CollideLevelTotal,  String message){
+    private void displayEventSection(final int id, Date eventDate, int height, int CollideLevel,
+                                     int CollideLevelTotal, String message) {
         SimpleDateFormat timeFormatter = new SimpleDateFormat("HH:mm", Locale.ENGLISH);
         String displayValue = timeFormatter.format(eventDate);
-        String[]hourMinutes = displayValue.split(":");
-        int hours = Integer.parseInt(hourMinutes[0])-StartingHour;
+        String[] hourMinutes = displayValue.split(":");
+        int hours = Integer.parseInt(hourMinutes[0]) - StartingHour;
         int minutes = Integer.parseInt(hourMinutes[1]);
         Log.d(TAG, "Hour value " + hours);
         Log.d(TAG, "Minutes value " + minutes);
         int topViewMargin = (hours * 60) + ((minutes * 60) / 100);
         Log.d(TAG, "Margin top " + topViewMargin);
-        //TODO: C type collision
-        createEventView(id, topViewMargin,24 + 500/CollideLevelTotal * CollideLevel, CollideLevelTotal,  height, message);
+        createEventView(id, topViewMargin, leftMargin + screenWidth / CollideLevelTotal * CollideLevel,
+                CollideLevelTotal, height, message);
     }
 
-    private void createEventView(final int id, int topMargin, int leftMargin, int width, int height, final String message){
+    private void createEventView(final int id, int topMargin, int leftMargin, int width, int height,
+                                 final String message) {
         final TextView mEventView = new TextView(ProgramsActivity.this);
-        RelativeLayout.LayoutParams lParam = new RelativeLayout.LayoutParams(500/width, LinearLayout.LayoutParams.WRAP_CONTENT);
+        RelativeLayout.LayoutParams lParam = new RelativeLayout.LayoutParams(screenWidth / width,
+                LinearLayout.LayoutParams.WRAP_CONTENT);
         lParam.addRule(RelativeLayout.ALIGN_PARENT_TOP);
         lParam.topMargin = topMargin * 2;
         lParam.leftMargin = leftMargin;
@@ -182,8 +200,13 @@ public class ProgramsActivity extends AppCompatActivity {
         mEventView.setGravity(0x11);
         mEventView.setTextColor(Color.parseColor("#ffffff"));
         mEventView.setText(message);
-        mEventView.setBackgroundColor(Color.parseColor("#3F51B5"));
         mEventView.setTag("event");
+        Drawable shape = getResources().getDrawable(R.drawable.shape);
+        mEventView.setBackground(shape);
+        TypedArray colorArray = getResources().obtainTypedArray(R.array.chart);
+        mEventView.getBackground().setColorFilter(colorArray.getColor((id - 1) % 8, 0),
+                PorterDuff.Mode.DARKEN);
+        colorArray.recycle();
         mLayout.addView(mEventView, eventIndex - 1);
         mEventView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -193,5 +216,6 @@ public class ProgramsActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
+        mLayout.setOnTouchListener(onSwipeTouchListener);
     }
 }
