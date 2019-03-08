@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:appcompat="http://schemas.android.com/tools">
+    <!--item
+        android:id="@+id/action_search"
+        android:titleCondensed="Search"
+        android:title="Search"
+        android:icon="@drawable/outline_search_white_24"
+        app:showAsAction="ifRoom"
+        app:actionViewClass="android.support.v7.widget.SearchView"
+        appcompat:showAsAction="never"/-->
+    <item android:id="@+id/search_bar"
+        android:title="Search"
+        android:icon="@drawable/outline_search_white_36"
+        app:showAsAction="ifRoom"
+        app:actionViewClass="android.widget.SearchView"/>
+    <item android:id="@+id/itemParent" android:visible="true"
+        android:titleCondensed="Areas"
+        android:title="Kategóriák"
+        android:icon="@android:drawable/arrow_down_float"
+        android:enabled="true">
+        <menu>
+            <group android:checkableBehavior="all">
+                <item android:id="@+id/item1"
+                    android:titleCondensed="Options"
+                    android:title="Középiskolás"
+                    app:showAsAction="always"
+                    android:checked="true">
+                </item>
+                <item android:id="@+id/item2"
+                    android:titleCondensed="Persist"
+                    android:title="Kultúrális"
+                    android:checked="true">
+                </item>
+                <item android:id="@+id/item3"
+                    android:titleCondensed="Persist"
+                    android:title="Öko"
+                    android:checked="true">
+                </item>
+                <item android:id="@+id/item4"
+                    android:titleCondensed="Persist"
+                    android:title="Egyetemista"
+                    android:checked="true">
+                </item>
+                <item android:id="@+id/item5"
+                    android:titleCondensed="Persist"
+                    android:title="Érzékenyítő"
+                    android:checked="true">
+                </item>
+                <item android:id="@+id/item6"
+                    android:titleCondensed="Persist"
+                    android:title="Kapcsolati"
+                    android:checked="true">
+                </item>
+                <item android:id="@+id/item7"
+                    android:titleCondensed="Persist"
+                    android:title="Sport"
+                    android:checked="true">
+                </item>
+                <item android:id="@+id/item8"
+                    android:titleCondensed="Persist"
+                    android:title="Egyéb"
+                    android:checked="true">
+                </item>
+
+            </group>
+        </menu>
+    </item>
+
+
+</menu>

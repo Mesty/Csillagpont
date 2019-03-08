@@ -4,10 +4,6 @@ android:shape="rectangle">
 
 <solid android:color="#FFFFFF" />
 
-<!--stroke
-    android:width="2dp"
-    android:color="#FA0000" /-->
-
 <padding
     android:bottom="0dp"
     android:left="5dp"

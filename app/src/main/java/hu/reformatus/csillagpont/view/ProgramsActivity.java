@@ -1,21 +1,29 @@
 package hu.reformatus.csillagpont.view;
 
 import android.annotation.SuppressLint;
+import android.app.SearchManager;
+import android.app.SearchableInfo;
+import android.support.v4.view.MenuItemCompat;
+import android.support.v7.app.AppCompatActivity;;
+import android.support.v7.widget.Toolbar;
+import android.content.Context;
+import android.os.Bundle;
+//import android.support.v7.widget.SearchView;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.content.Intent;
-import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Color;
-import android.graphics.ColorSpace;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
-import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.ScrollView;
+import android.widget.SearchView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -34,7 +42,7 @@ import hu.reformatus.csillagpont.viewmodel.OnSwipeTouchListener;
 import static hu.reformatus.csillagpont.model.programs.databases.EventObjects.getCollideLevel;
 
 
-public class ProgramsActivity extends AppCompatActivity {
+public class ProgramsActivity extends AppCompatActivity implements SearchView.OnQueryTextListener {
     private static final String TAG = ProgramsActivity.class.getSimpleName();
     private ImageView previousDay;
     private ImageView nextDay;
@@ -54,6 +62,9 @@ public class ProgramsActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_programs);
+        Toolbar toolbar = findViewById(R.id.programs_toolbar);
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setTitle(getString(R.string.programs_title));
         mQuery = new DatabaseQuery(this);
         mLayout = findViewById(R.id.left_event_column);
         eventIndex = mLayout.getChildCount();
@@ -100,6 +111,77 @@ public class ProgramsActivity extends AppCompatActivity {
             }
         };
         rows.setOnTouchListener(onSwipeTouchListener);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.programs_menu, menu);
+        MenuItem searchItem = menu.findItem(R.id.search_bar);
+        SearchView searchView = (SearchView) MenuItemCompat.getActionView(searchItem);
+        if (searchView != null) {
+            searchView.setOnQueryTextListener(this);
+        }
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle item selection
+        switch (item.getItemId()) {
+            case R.id.item1:
+                item.setChecked(!item.isChecked());
+                break;
+            case R.id.item2:
+                item.setChecked(!item.isChecked());
+                break;
+            case R.id.item3:
+                item.setChecked(!item.isChecked());
+                break;
+            case R.id.item4:
+                item.setChecked(!item.isChecked());
+                break;
+            case R.id.item5:
+                item.setChecked(!item.isChecked());
+                break;
+            case R.id.item6:
+                item.setChecked(!item.isChecked());
+                break;
+            case R.id.item7:
+                item.setChecked(!item.isChecked());
+                break;
+            case R.id.item8:
+                item.setChecked(!item.isChecked());
+                break;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+        //keep appbar menu visible
+        item.setShowAsAction(MenuItem.SHOW_AS_ACTION_COLLAPSE_ACTION_VIEW);
+        item.setActionView(new View(this));
+        item.setOnActionExpandListener(new MenuItem.OnActionExpandListener() {
+            @Override
+            public boolean onMenuItemActionExpand(MenuItem item) {
+                return false;
+            }
+
+            @Override
+            public boolean onMenuItemActionCollapse(MenuItem item) {
+                return false;
+            }
+        });
+        return super.onOptionsItemSelected(item);
+    }
+
+    public boolean onQueryTextChange(String newText) {
+        //mStatusView.setText("Query = " + newText);
+        Log.d(TAG, "onQueryTextChange: Query = " + newText);
+        return false;
+    }
+
+    public boolean onQueryTextSubmit(String query) {
+        //mStatusView.setText("Query = " + query + " : submitted");
+        Log.d(TAG, "onQueryTextSubmit: Query = " + query + " : submitted");
+        return false;
     }
 
     private void setVisibilities() {
@@ -168,7 +250,7 @@ public class ProgramsActivity extends AppCompatActivity {
         mCal.setTimeInMillis(timeDifference);
         int hours = mCal.get(Calendar.HOUR) - 1;
         int minutes = mCal.get(Calendar.MINUTE);
-        return (hours * 60) + ((minutes * 60) / 100);
+        return (hours * 60) + minutes;
     }
 
     private void displayEventSection(final int id, Date eventDate, int height, int CollideLevel,
@@ -180,9 +262,10 @@ public class ProgramsActivity extends AppCompatActivity {
         int minutes = Integer.parseInt(hourMinutes[1]);
         Log.d(TAG, "Hour value " + hours);
         Log.d(TAG, "Minutes value " + minutes);
-        int topViewMargin = (hours * 60) + ((minutes * 60) / 100);
+        int topViewMargin = (hours * 60) + minutes; //FIXME: const 50 tuning
         Log.d(TAG, "Margin top " + topViewMargin);
-        createEventView(id, topViewMargin, leftMargin + screenWidth / CollideLevelTotal * CollideLevel,
+        createEventView(id, topViewMargin,
+                leftMargin + screenWidth / CollideLevelTotal * CollideLevel,
                 CollideLevelTotal, height, message);
     }
 
@@ -204,7 +287,8 @@ public class ProgramsActivity extends AppCompatActivity {
         Drawable shape = getResources().getDrawable(R.drawable.shape);
         mEventView.setBackground(shape);
         TypedArray colorArray = getResources().obtainTypedArray(R.array.chart);
-        mEventView.getBackground().setColorFilter(colorArray.getColor((id - 1) % 8, 0),
+        mEventView.getBackground().setColorFilter(
+                colorArray.getColor((id - 1) % colorArray.length(), 0),
                 PorterDuff.Mode.DARKEN);
         colorArray.recycle();
         mLayout.addView(mEventView, eventIndex - 1);
